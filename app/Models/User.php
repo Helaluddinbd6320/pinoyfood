@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use Filament\Models\Contracts\FilamentUser;   // added
-use Filament\Panel;                            // added
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable implements FilamentUser   // added
+class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'phone', 'is_active'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -21,12 +22,18 @@ class User extends Authenticatable implements FilamentUser   // added
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
-    // added. Step 5 replaces this with role and is_active checks.
+    // Placeholder from step 1. Step 5 replaces it with role and is_active checks.
     public function canAccessPanel(Panel $panel): bool
     {
         return true;
+    }
+
+    public function assignedOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'rider_id');
     }
 }
