@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Customer extends Model
+/**
+ * Storefront customer. Authenticatable through the "customer" guard only
+ * (Google sign-in, no password). Staff use App\Models\User.
+ */
+class Customer extends Authenticatable
 {
     use HasFactory, SoftDeletes;
 

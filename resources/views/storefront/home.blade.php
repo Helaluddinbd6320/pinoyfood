@@ -12,9 +12,14 @@
                 <a href="#menu">Menu</a>
                 <a href="#how">How it works</a>
                 <a href="#areas">Delivery areas</a>
+                <livewire:account-drawer />
                 <livewire:cart-drawer />
             </nav>
         </header>
+
+        @if (session('auth_error'))
+            <p class="ac-er" role="alert">{{ session('auth_error') }}</p>
+        @endif
 
         <div class="hero">
             <div>
@@ -34,6 +39,8 @@
                 <div class="tag b">Pay on delivery</div>
             </div>
         </div>
+
+        <livewire:welcome-strip />
 
         <x-offers-banner />
 
@@ -66,6 +73,7 @@
         <div class="wrap">
             <h2>Miss home? Order lutong bahay today.</h2>
             <a class="btn" href="#menu">Order now</a>
+            <a href="{{ route('privacy') }}" style="color:inherit">Privacy</a>
         </div>
     </footer>
 </x-layouts.storefront>

@@ -8,15 +8,19 @@ use App\Data\PlaceOrderData;
 use App\Exceptions\InsufficientStockException;
 use App\Exceptions\PricesChangedException;
 use App\Models\Area;
+use App\Models\Customer;
 use App\Models\Product;
 use App\Services\CartService;
+use App\Services\CustomerAccountService;
 use App\Services\OrderService;
 use App\Services\PricingService;
 use DomainException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 use Livewire\Component;
 
 class Checkout extends Component
@@ -50,6 +54,20 @@ class Checkout extends Component
 
     public function mount(CartService $cart, PricingService $pricing): void
     {
+        // Signed-in customers get their details prefilled (spec 6.3). Guests are unchanged.
+        $customer = Auth::guard('customer')->user();
+
+        if ($customer instanceof Customer) {
+            $this->name = (string) $customer->name;
+            $this->phone = (string) $customer->phone_raw;
+            $this->pinUrl = (string) $customer->default_pin_url;
+            $this->optIn = (bool) $customer->whatsapp_opt_in;
+
+            if ($customer->area_id && Area::query()->where('is_active', true)->whereKey($customer->area_id)->exists()) {
+                $this->areaId = (string) $customer->area_id;
+            }
+        }
+
         $this->seenFingerprint = $this->quote($cart, $pricing)->fingerprint();
     }
 
@@ -60,7 +78,7 @@ class Checkout extends Component
         $this->notice = null;
     }
 
-    public function place(OrderService $orders, CartService $cart, PricingService $pricing, Request $request): void
+    public function place(OrderService $orders, CartService $cart, PricingService $pricing, CustomerAccountService $accounts, Request $request): void
     {
         if ($this->website !== '') {
             $this->redirectRoute('home');
@@ -129,6 +147,17 @@ class Checkout extends Component
         }
 
         $cart->clear();
+
+        // A Google-only customer has no number yet: the number typed here links them
+        // to the customer record the order was placed on. Never blocks the order.
+        $signedIn = Auth::guard('customer')->user();
+        if ($signedIn instanceof Customer && blank($signedIn->phone_search)) {
+            try {
+                Auth::guard('customer')->login($accounts->attachPhone($signedIn, trim($this->phone)));
+            } catch (DomainException|InvalidArgumentException) {
+                // Leave the account as it is.
+            }
+        }
 
         $this->redirect(URL::temporarySignedRoute('order.done', now()->addDays(7), ['orderNo' => $order->order_no]));
     }

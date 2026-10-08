@@ -19,16 +19,21 @@ class CustomerLookupService
 {
     /** Only these extra fields can be passed in. Never pass raw request data. */
     private const ALLOWED = [
-        'name', 'email', 'google_id', 'avatar_url', 'area_id',
-        'address_notes', 'default_pin_url', 'default_lat', 'default_lng',
+        'name',
+        'email',
+        'google_id',
+        'avatar_url',
+        'area_id',
+        'address_notes',
+        'default_pin_url',
+        'default_lat',
+        'default_lng',
     ];
 
     // No 0, O, 1 or I, to avoid mix-ups when a customer reads the code aloud.
     private const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-    public function __construct(private readonly PhoneNormalizer $phones)
-    {
-    }
+    public function __construct(private readonly PhoneNormalizer $phones) {}
 
     /**
      * Find only. Soft-deleted customers are not returned.
@@ -82,7 +87,7 @@ class CustomerLookupService
      */
     private function locate(array $n, bool $withTrashed): ?Customer
     {
-        $query = fn () => $withTrashed ? Customer::withTrashed() : Customer::query();
+        $query = fn() => $withTrashed ? Customer::withTrashed() : Customer::query();
 
         if ($n['e164'] !== null) {
             $exact = $query()->where('phone_e164', $n['e164'])->first();
@@ -127,7 +132,7 @@ class CustomerLookupService
         return $customer;
     }
 
-    private function newReferralCode(): string
+    public function newReferralCode(): string
     {
         $max = strlen(self::CODE_ALPHABET) - 1;
 
