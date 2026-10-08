@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'storefront.home')->name('home');
 Route::view('/checkout', 'storefront.checkout')->name('checkout');
+Route::view('/whatsapp-order', 'storefront.whatsapp-order')->name('whatsapp.order');
 Route::view('/privacy', 'storefront.privacy')->name('privacy');
 
 Route::get('/order/{orderNo}', OrderDoneController::class)

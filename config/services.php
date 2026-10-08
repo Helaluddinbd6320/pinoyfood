@@ -29,4 +29,8 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    'whatsapp' => [
+        'business_number' => env('WHATSAPP_BUSINESS_NUMBER'),
+    ],
+
 ];

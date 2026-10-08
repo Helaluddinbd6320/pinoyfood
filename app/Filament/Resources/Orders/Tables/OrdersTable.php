@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Orders\Tables;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\OrderStatusService;
+use App\Services\WhatsappLinkService;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
@@ -128,8 +129,10 @@ class OrdersTable
                         ->url(fn (Order $record) => self::mapsUrl($record))
                         ->openUrlInNewTab()
                         ->visible(fn (Order $record) => self::mapsUrl($record) !== null),
+                    // Step 11: opens the chat with a ready message for the order's current status.
                     Action::make('whatsapp')->label('WhatsApp')->icon(Heroicon::OutlinedChatBubbleLeftRight)
-                        ->url(fn (Order $record) => 'https://wa.me/'.ltrim((string) $record->phone_e164, '+'))
+                        ->url(fn (Order $record) => app(WhatsappLinkService::class)
+                            ->chat($record->phone_e164, app(WhatsappLinkService::class)->orderStatusText($record)))
                         ->openUrlInNewTab()
                         ->visible(fn (Order $record) => filled($record->phone_e164)),
                 ]),

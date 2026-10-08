@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Services\CartService;
 use App\Services\PricingService;
 use App\Services\SettingsService;
+use App\Services\WhatsappLinkService;
 use App\Support\ProductLook;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -75,6 +76,12 @@ class CartDrawer extends Component
             $progress = (int) min(100, floor((float) $ratio));
         }
 
+        // "Order via WhatsApp" opens a short form that saves the order first (step 11).
+        // Hidden when no shop number is set, the cart is empty or the minimum is not met.
+        $waUrl = ($lines !== [] && $quote->meetsMinimum && app(WhatsappLinkService::class)->businessNumber() !== null)
+            ? route('whatsapp.order')
+            : null;
+
         return view('livewire.cart-drawer', [
             'lines' => $lines,
             'count' => array_sum($items),
@@ -83,6 +90,7 @@ class CartDrawer extends Component
             'remaining' => (string) ($quote->amountToFreeDelivery ?? '0'),
             'progress' => $progress,
             'minOrder' => (string) $settings->get('min_order_amount'),
+            'waUrl' => $waUrl,
         ]);
     }
 }
