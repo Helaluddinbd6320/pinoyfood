@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             AreaSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,   // needs categories
+            ProductPairSeeder::class, // needs products
             SettingSeeder::class,
             AdminUserSeeder::class,
         ]);

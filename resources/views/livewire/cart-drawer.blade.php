@@ -61,6 +61,9 @@
             @endforelse
         </div>
 
+        {{-- Step 10: "Pairs well with" and "Picked for you" --}}
+        <livewire:suggestions />
+
         <div class="foot">
             @if ($count > 0)
                 <div class="sum">
