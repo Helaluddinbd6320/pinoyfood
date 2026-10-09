@@ -32,6 +32,36 @@ class PaymentVerificationService
         });
     }
 
+    /**
+     * Step 13: staff took the order by phone or chat and saw the transfer arrive themselves,
+     * so there is no screenshot to wait for. Still counted as verified, with the staff member on record.
+     */
+    public function markPaidByStaff(Payment $payment, User $by): Payment
+    {
+        return DB::transaction(function () use ($payment, $by): Payment {
+            $locked = Payment::query()->lockForUpdate()->findOrFail($payment->id);
+
+            if (! in_array($locked->status, [PaymentStatus::AwaitingProof, PaymentStatus::AwaitingVerification], true)) {
+                throw new InvalidArgumentException('This payment was already handled.');
+            }
+
+            $payload = (array) ($locked->payload ?? []);
+            $payload['entered_by_staff'] = true;
+
+            $locked->forceFill([
+                'status' => PaymentStatus::Paid,
+                'verified_by' => $by->id,
+                'verified_at' => now(),
+                'reject_reason' => null,
+                'payload' => $payload,
+            ])->save();
+
+            $this->recalculate((int) $locked->order_id);
+
+            return $locked;
+        });
+    }
+
     public function reject(Payment $payment, User $by, string $reason): Payment
     {
         $reason = trim($reason);

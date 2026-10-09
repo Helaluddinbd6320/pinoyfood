@@ -121,6 +121,13 @@
             </x-filament::section>
 
             <x-filament::section heading="Order summary">
+                @php
+                    $feeApplies = $quote->prepayType === 'delivery_fee_prepay';
+                    $riderCollects = ($feePaid && $feeApplies)
+                        ? bcsub((string) $quote->total, (string) $quote->prepayAmount, 2)
+                        : (string) $quote->total;
+                @endphp
+
                 <div style="display:flex;justify-content:space-between;padding:.2rem 0">
                     <span>Items</span><span>SAR {{ $quote->subtotal }}</span>
                 </div>
@@ -138,8 +145,16 @@
                         Add SAR {{ $quote->amountToFreeDelivery }} more for free delivery.
                     </p>
                 @endif
+
+                @if ($feeApplies)
+                    <label style="display:flex;gap:.5rem;align-items:flex-start;margin:.6rem 0;font-size:.9rem">
+                        <input type="checkbox" wire:model.live="feePaid" style="margin-top:.2rem">
+                        <span>Delivery fee (SAR {{ $quote->prepayAmount }}) already paid in advance. Tick only after you saw the transfer arrive.</span>
+                    </label>
+                @endif
+
                 <div style="display:flex;justify-content:space-between;padding:.5rem 0 0;margin-top:.4rem;border-top:1px solid rgba(128,128,128,.3);font-weight:700">
-                    <span>Rider collects</span><span>SAR {{ $quote->total }}</span>
+                    <span>Rider collects</span><span>SAR {{ $riderCollects }}</span>
                 </div>
                 @if (! $quote->meetsMinimum)
                     <p style="color:#c0392b;font-size:.85rem">Minimum order is SAR {{ $quote->minOrderAmount }}.</p>

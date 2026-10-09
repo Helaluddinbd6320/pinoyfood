@@ -6,6 +6,7 @@ namespace App\Filament\Pages;
 
 use App\Data\PlaceOrderData;
 use App\Enums\OrderSource;
+use App\Enums\PaymentType;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Area;
 use App\Models\Customer;
@@ -13,6 +14,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Services\CustomerLookupService;
 use App\Services\OrderService;
+use App\Services\PaymentVerificationService;
 use App\Services\PricingService;
 use BackedEnum;
 use DomainException;
@@ -20,6 +22,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 
 class NewOrder extends Page
 {
@@ -42,6 +45,9 @@ class NewOrder extends Page
     public string $areaId = '';
     public string $pinUrl = '';
     public string $notes = '';
+
+    /** Staff saw the delivery fee transfer arrive themselves (spec 6.4). */
+    public bool $feePaid = false;
 
     /** @var array<int,int> productId => qty */
     public array $qty = [];
@@ -127,7 +133,7 @@ class NewOrder extends Page
         }
     }
 
-    public function place(OrderService $orders): void
+    public function place(OrderService $orders, PaymentVerificationService $verification): void
     {
         $this->validate();
 
@@ -150,6 +156,7 @@ class NewOrder extends Page
             optInSource: 'admin',
             source: $this->source,
             createdBy: auth()->id(),
+            prepayDeliveryFee: $this->feePaid,
         );
 
         try {
@@ -166,13 +173,29 @@ class NewOrder extends Page
             return;
         }
 
+        $body = 'Source: '.OrderSource::from($this->source)->label();
+
+        // The tick only matters when OrderService created a delivery fee payment (a fee applies and advance payment is allowed).
+        if ($this->feePaid) {
+            $payment = $order->payments->first(fn ($p) => $p->type === PaymentType::DeliveryFeePrepay);
+
+            if ($payment) {
+                try {
+                    $verification->markPaidByStaff($payment, auth()->user());
+                    $body .= ' · fee paid in advance, rider collects less';
+                } catch (InvalidArgumentException $e) {
+                    $body .= ' · the fee payment could not be marked paid: '.$e->getMessage();
+                }
+            }
+        }
+
         Notification::make()
             ->title("Order {$order->order_no} added")
-            ->body('Source: '.OrderSource::from($this->source)->label())
+            ->body($body)
             ->success()
             ->send();
 
-        $this->reset(['phone', 'name', 'areaId', 'pinUrl', 'notes', 'qty', 'customerId']);
+        $this->reset(['phone', 'name', 'areaId', 'pinUrl', 'notes', 'qty', 'customerId', 'feePaid']);
         $this->resetValidation();
     }
 
@@ -221,6 +244,7 @@ class NewOrder extends Page
             'areaId' => ['required', 'integer', Rule::exists('areas', 'id')->where('is_active', true)],
             'pinUrl' => ['nullable', 'string', 'max:500', 'url:http,https'],
             'notes' => ['nullable', 'string', 'max:255'],
+            'feePaid' => ['boolean'],
         ];
     }
 

@@ -2,12 +2,16 @@
 
 namespace App\Services;
 
+use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class OrderStatusService
 {
+    /** Spec 6.5: this many no-answers flag the customer as prepay required. */
+    public const NO_ANSWER_THRESHOLD = 2;
+
     public const MOVES = [
         'new'              => ['confirmed', 'no_answer', 'cancelled'],
         'confirmed'        => ['out_for_delivery', 'no_answer', 'cancelled'],
@@ -59,7 +63,38 @@ class OrderStatusService
 
             $locked->save();
 
+            $this->updateCustomer($locked, $to);
+
             return $locked;
         });
+    }
+
+    /** No-answer counting (spec 6.5) and total_spent on delivery. Runs inside the move transaction. */
+    private function updateCustomer(Order $order, string $to): void
+    {
+        if ($to === 'no_answer') {
+            $customer = Customer::withTrashed()->lockForUpdate()->find($order->customer_id);
+
+            if ($customer === null) {
+                return;
+            }
+
+            $count = ((int) $customer->no_answer_count) + 1;
+            $customer->no_answer_count = $count;
+
+            if ($count >= self::NO_ANSWER_THRESHOLD) {
+                $customer->requires_prepay = true;
+            }
+
+            $customer->save();
+        }
+
+        if ($to === 'delivered') {
+            // Delivered orders never move again, so this adds each order once.
+            $amount = number_format((float) $order->total, 2, '.', '');
+
+            Customer::withTrashed()->whereKey($order->customer_id)
+                ->update(['total_spent' => DB::raw('total_spent + '.$amount)]);
+        }
     }
 }
