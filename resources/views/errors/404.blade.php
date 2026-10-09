@@ -1,0 +1,1 @@
+@include('errors.page', ['code' => 404, 'title' => 'Page not found', 'message' => 'We could not find that page. The link may be old or mistyped.'])

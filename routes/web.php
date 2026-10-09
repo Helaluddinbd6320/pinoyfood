@@ -11,16 +11,17 @@ Route::view('/whatsapp-order', 'storefront.whatsapp-order')->name('whatsapp.orde
 Route::view('/privacy', 'storefront.privacy')->name('privacy');
 
 Route::get('/order/{orderNo}', OrderDoneController::class)
-    ->middleware('signed')
+    ->middleware(['signed', 'throttle:60,1'])
     ->name('order.done');
 
-// Step 12: customers upload a payment screenshot through a signed, expiring link.
+// Customers upload a payment screenshot through a signed, expiring link.
 Route::get('/pay/{payment}', [PaymentProofController::class, 'upload'])
-    ->middleware('signed')
+    ->middleware(['signed', 'throttle:60,1'])
     ->name('payment.proof');
 
-// Step 12: staff view screenshots (role checked inside the controller).
+// Staff view screenshots (role checked inside the controller).
 Route::get('/staff/payment-proof/{payment}', [PaymentProofController::class, 'show'])
+    ->middleware('throttle:120,1')
     ->name('payments.proof');
 
 Route::get('/auth/google', [GoogleController::class, 'redirect'])

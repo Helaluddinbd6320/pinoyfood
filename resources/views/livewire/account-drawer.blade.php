@@ -1,8 +1,10 @@
 <div class="ac-wrap" x-data="{ open: false }" @keydown.escape.window="open = false">
     @if (! $customer)
-        <form method="GET" action="{{ route('auth.google') }}">
-            <button class="ac-btn" type="submit" aria-label="Sign in with Google"><span class="ac-g">G</span><span>Sign in</span></button>
-        </form>
+        @if (config('services.google.enabled'))
+            <form method="GET" action="{{ route('auth.google') }}">
+                <button class="ac-btn" type="submit" aria-label="Sign in with Google"><span class="ac-g">G</span><span>Sign in</span></button>
+            </form>
+        @endif
     @else
         <button class="ac-btn" type="button" @click="open = true" aria-label="My account">
             <span class="ac-av">{{ $initial }}</span><span>{{ $first }}</span>

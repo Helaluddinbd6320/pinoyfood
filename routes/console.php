@@ -8,8 +8,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Spec 6.6 phase 2 (timezone is Asia/Riyadh via config/app.php).
+// Timezone is Asia/Riyadh via config/app.php.
+Schedule::command('queue:work --stop-when-empty --max-time=55')->everyMinute()->withoutOverlapping();
+Schedule::command('backup:database')->dailyAt('02:30')->withoutOverlapping();
 Schedule::command('suggestions:rebuild')->dailyAt('03:00')->withoutOverlapping();
-
-// Spec 7: delete payment screenshots 90 days after delivery.
 Schedule::command('payments:cleanup-proofs')->dailyAt('03:30')->withoutOverlapping();

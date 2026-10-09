@@ -27,10 +27,23 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+        // Switch off at launch while phone numbers are unverified (step 9 risk).
+        'enabled' => env('GOOGLE_LOGIN_ENABLED', true),
     ],
 
     'whatsapp' => [
         'business_number' => env('WHATSAPP_BUSINESS_NUMBER'),
+    ],
+
+    'contact' => [
+        'email' => env('CONTACT_EMAIL', 'hello@pinoyfoodksa.com'),
+    ],
+
+    'backup' => [
+        // Outside public/. Change to a folder above the web root if you like.
+        'path' => env('BACKUP_PATH', storage_path('backups')),
+        'keep_days' => (int) env('BACKUP_KEEP_DAYS', 14),
+        'mysqldump' => env('MYSQLDUMP_BINARY', 'mysqldump'),
     ],
 
 ];

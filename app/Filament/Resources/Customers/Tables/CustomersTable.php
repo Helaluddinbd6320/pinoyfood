@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Customers\Tables;
 
 use App\Models\Customer;
+use App\Services\CustomerAnonymiseService;
+use DomainException;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -51,6 +53,23 @@ class CustomersTable
                     ->url(fn (Customer $record) => 'https://wa.me/'.ltrim((string) $record->phone_e164, '+'))
                     ->openUrlInNewTab()
                     ->visible(fn (Customer $record) => filled($record->phone_e164)),
+                // Spec 7: delete on request. Admin only. Scrubs personal data, keeps order totals.
+                Action::make('anonymise')
+                    ->label('Delete personal data')->icon(Heroicon::OutlinedTrash)->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete this customer\'s personal data?')
+                    ->modalDescription('Name, number, email, location and screenshots are removed from the customer and their orders. Order totals stay for reports. This cannot be undone.')
+                    ->visible(fn (Customer $record) => (bool) auth()->user()?->isAdmin() && ! $record->trashed())
+                    ->action(function (Customer $record) {
+                        abort_unless(auth()->user()?->isAdmin(), 403);
+
+                        try {
+                            app(CustomerAnonymiseService::class)->anonymise($record);
+                            Notification::make()->title('Personal data deleted')->success()->send();
+                        } catch (DomainException $e) {
+                            Notification::make()->title('Not deleted')->body($e->getMessage())->danger()->send();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

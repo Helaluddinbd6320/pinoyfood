@@ -1,0 +1,1 @@
+@include('errors.page', ['code' => 419, 'title' => 'Page expired', 'message' => 'Your session ran out. Please go back and try again.'])

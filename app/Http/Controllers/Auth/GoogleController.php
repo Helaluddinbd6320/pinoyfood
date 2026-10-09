@@ -16,11 +16,15 @@ class GoogleController extends Controller
 {
     public function redirect(): RedirectResponse
     {
+        abort_unless(config('services.google.enabled'), 404);
+
         return Socialite::driver('google')->redirect();
     }
 
     public function callback(CustomerAccountService $accounts, Request $request): RedirectResponse
     {
+        abort_unless(config('services.google.enabled'), 404);
+
         try {
             $google = Socialite::driver('google')->user();
         } catch (Throwable) {

@@ -1,0 +1,1 @@
+@include('errors.page', ['code' => 500, 'title' => 'Something went wrong', 'message' => 'Sorry, that was our mistake. Please try again in a moment, or message us on WhatsApp.'])

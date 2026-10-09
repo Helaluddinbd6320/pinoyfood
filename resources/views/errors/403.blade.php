@@ -1,0 +1,1 @@
+@include('errors.page', ['code' => 403, 'title' => 'Not allowed', 'message' => 'You do not have access to this page.'])
