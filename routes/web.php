@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\OrderDoneController;
+use App\Http\Controllers\PaymentProofController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'storefront.home')->name('home');
@@ -12,6 +13,15 @@ Route::view('/privacy', 'storefront.privacy')->name('privacy');
 Route::get('/order/{orderNo}', OrderDoneController::class)
     ->middleware('signed')
     ->name('order.done');
+
+// Step 12: customers upload a payment screenshot through a signed, expiring link.
+Route::get('/pay/{payment}', [PaymentProofController::class, 'upload'])
+    ->middleware('signed')
+    ->name('payment.proof');
+
+// Step 12: staff view screenshots (role checked inside the controller).
+Route::get('/staff/payment-proof/{payment}', [PaymentProofController::class, 'show'])
+    ->name('payments.proof');
 
 Route::get('/auth/google', [GoogleController::class, 'redirect'])
     ->middleware('throttle:20,1')

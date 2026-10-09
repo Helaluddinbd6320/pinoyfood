@@ -31,6 +31,7 @@ final readonly class PlaceOrderData
         public ?string $expectedFingerprint = null,
         public ?string $ip = null,
         public ?string $userAgent = null,
+        public bool $prepayDeliveryFee = false,
     ) {
     }
 }

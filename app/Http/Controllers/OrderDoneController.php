@@ -13,7 +13,8 @@ class OrderDoneController extends Controller
     {
         $order = Order::query()->where('order_no', $orderNo)->with('items')->firstOrFail();
         $area = $order->area_id ? Area::query()->find($order->area_id) : null;
+        $payments = $order->payments()->orderBy('id')->get();
 
-        return view('storefront.order-done', compact('order', 'area'));
+        return view('storefront.order-done', compact('order', 'area', 'payments'));
     }
 }

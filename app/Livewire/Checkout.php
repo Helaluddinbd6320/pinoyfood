@@ -47,6 +47,7 @@ class Checkout extends Component
     public string $slot = '';
     public string $notes = '';
     public bool $optIn = false;
+    public bool $prepay = false; // optional: pay the delivery fee in advance (spec 6.2)
     public string $website = ''; // honeypot, must stay empty
 
     public string $seenFingerprint = '';
@@ -125,6 +126,7 @@ class Checkout extends Component
             expectedFingerprint: $this->seenFingerprint,
             ip: $request->ip(),
             userAgent: $request->userAgent(),
+            prepayDeliveryFee: $this->prepay,
         );
 
         try {
@@ -217,6 +219,7 @@ class Checkout extends Component
             'slot' => ['nullable', Rule::in(array_keys($this->slots()))],
             'notes' => ['nullable', 'string', 'max:255'],
             'optIn' => ['boolean'],
+            'prepay' => ['boolean'],
         ];
     }
 

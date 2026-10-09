@@ -108,6 +108,19 @@
                     <p class="cx-muted">Add {{ \App\Support\Sar::format($quote->amountToFreeDelivery) }} more for free delivery.</p>
                 @endif
 
+                {{-- Spec 6.2: advance payment is optional for the delivery fee --}}
+                @if ($quote->prepayType === 'delivery_fee_prepay')
+                    <label class="cx-ck">
+                        <input type="checkbox" wire:model.live="prepay">
+                        <span>Pay the delivery fee ({{ \App\Support\Sar::format($quote->prepayAmount) }}) in advance. Optional. After you place the order we show where to send it and you upload a screenshot.</span>
+                    </label>
+                    @if ($prepay)
+                        <p class="cx-muted">Once we verify your payment, the rider collects {{ \App\Support\Sar::format(bcsub((string) $quote->total, (string) $quote->prepayAmount, 2)) }} instead.</p>
+                    @endif
+                @elseif ($quote->prepayType === 'deposit')
+                    <p class="cx-muted">A small deposit of {{ \App\Support\Sar::format($quote->prepayAmount) }} is needed for this order. After you place the order we show where to send it.</p>
+                @endif
+
                 @unless ($quote->meetsMinimum)
                     <p class="cx-er">Your order is below the minimum order amount.</p>
                 @endunless
@@ -120,7 +133,7 @@
                 <button class="cx-btn" type="submit" wire:loading.attr="disabled" wire:target="place" @disabled(! $quote->meetsMinimum)>
                     {{ $notice ? 'Confirm and place order' : 'Place order' }}
                 </button>
-                <p class="cx-muted">Pay cash or card to the rider. No advance payment needed.</p>
+                <p class="cx-muted">Pay cash or card to the rider. Paying the delivery fee in advance is optional.</p>
             </div>
         </form>
     @endif

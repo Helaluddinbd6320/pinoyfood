@@ -10,6 +10,10 @@
             <p class="cx-muted">You will get a WhatsApp message when we confirm.</p>
         </div>
 
+        @foreach ($payments as $payment)
+            <livewire:payment-proof-upload :payment-id="$payment->id" :key="'pp-'.$payment->id" />
+        @endforeach
+
         <div class="cx-card">
             <h2 class="cx-h2">Your order</h2>
             @foreach ($order->items as $item)

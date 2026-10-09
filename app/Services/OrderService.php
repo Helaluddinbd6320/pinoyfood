@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\PlaceOrderData;
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentType;
 use App\Exceptions\InsufficientStockException;
 use App\Exceptions\PricesChangedException;
 use App\Models\Area;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\Pricing\Quote;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -55,7 +59,7 @@ class OrderService
                 }
             }
 
-            // 2. Reprice on the server. Prepay is step 12, so false here.
+            // 2. Reprice on the server.
             $area = Area::query()->where('is_active', true)->findOrFail($data->areaId);
             $quote = $this->pricing->quote($data->cart, $area, $now, false);
 
@@ -161,8 +165,34 @@ class OrderService
                 throw new LogicException('Order items do not match the pricing quote.');
             }
 
-            return $order->load('items');
+            // 6. Optional advance payment (spec 6.2). The amount comes from the quote, never from the browser.
+            // It stays "awaiting_proof" and does not reduce amount_due_on_delivery until staff verify it.
+            if ($this->wantsPrepay($quote, $data, $customer)) {
+                $order->payments()->create([
+                    'type' => PaymentType::from((string) $quote->prepayType),
+                    'method' => 'other',
+                    'amount' => $this->money($quote->prepayAmount),
+                    'status' => PaymentStatus::AwaitingProof,
+                ]);
+            }
+
+            return $order->load('items', 'payments');
         });
+    }
+
+    private function wantsPrepay(Quote $quote, PlaceOrderData $data, Customer $customer): bool
+    {
+        if ($quote->prepayType === null || bccomp($this->money($quote->prepayAmount), '0', 2) !== 1) {
+            return false;
+        }
+
+        // A required deposit (admin setting) is always created.
+        if ($quote->prepayType === 'deposit') {
+            return true;
+        }
+
+        // The delivery fee is optional, unless the customer is flagged (spec 6.2).
+        return $data->prepayDeliveryFee || (bool) $customer->requires_prepay;
     }
 
     private function money(mixed $value): string
