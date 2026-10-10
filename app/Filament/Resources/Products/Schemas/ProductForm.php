@@ -26,13 +26,19 @@ class ProductForm
                 TextInput::make('name')
                     ->required()->maxLength(150)
                     ->live(onBlur: true)
-                    ->afterStateUpdated(function (Set $set, ?string $state, string $operation) {
-                        if ($operation === 'create') {
-                            $set('slug', Str::slug((string) $state));
-                        }
+                    // create ও edit দুই ক্ষেত্রেই নাম বদলালে slug অটো বদলাবে
+                    ->afterStateUpdated(function (Set $set, ?string $state) {
+                        $set('slug', Str::slug((string) $state));
                     }),
                 TextInput::make('name_tl')->label('Tagalog name')->maxLength(150),
-                TextInput::make('slug')->required()->maxLength(160)->unique(ignoreRecord: true),
+                TextInput::make('slug')
+                    ->required()->maxLength(160)->unique(ignoreRecord: true)
+                    // edit পেজ খোলার সময় slug খালি থাকলে নাম থেকে ভরে দেয়
+                    ->afterStateHydrated(function (Get $get, Set $set, ?string $state) {
+                        if (blank($state) && filled($get('name'))) {
+                            $set('slug', Str::slug((string) $get('name')));
+                        }
+                    }),
                 Textarea::make('description')->columnSpanFull(),
                 Textarea::make('ingredients')->columnSpanFull(),
                 TagsInput::make('allergens'),
