@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -65,8 +66,37 @@ class OrderStatusService
 
             $this->updateCustomer($locked, $to);
 
+            if ($to === 'cancelled') {
+                $this->restock($locked);
+            }
+
             return $locked;
         });
+    }
+
+    /**
+     * Puts the ordered quantities back on the shelf. Cancelled is a final status, so this
+     * runs once per order. Products that no longer track stock are left alone.
+     */
+    private function restock(Order $order): void
+    {
+        $items = DB::table('order_items')
+            ->where('order_id', $order->id)
+            ->whereNotNull('product_id')
+            ->groupBy('product_id')
+            ->selectRaw('product_id, SUM(qty) as qty')
+            ->pluck('qty', 'product_id')
+            ->all();
+
+        // Fixed order, so two cancellations at once cannot deadlock.
+        ksort($items);
+
+        foreach ($items as $productId => $qty) {
+            Product::withTrashed()
+                ->whereKey((int) $productId)
+                ->where('track_stock', true)
+                ->increment('stock', (int) $qty);
+        }
     }
 
     /** No-answer counting (spec 6.5) and total_spent on delivery. Runs inside the move transaction. */
