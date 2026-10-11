@@ -25,7 +25,7 @@ class ProductGrid extends Component
         $status = app(CartService::class)->add($productId);
 
         $message = match ($status) {
-            'added' => ($name ?? 'Item').' added to cart',
+            'added' => ($name ?? 'Item') . ' added to cart',
             'max' => 'That is all we have in stock',
             'sold_out' => 'Sorry, this item is sold out',
             default => 'This item is not available',
@@ -40,13 +40,13 @@ class ProductGrid extends Component
         $products = Product::query()
             ->with('category')
             ->where('is_active', true)
-            ->whereHas('category', fn ($query) => $query->where('is_active', true))
+            ->whereHas('category', fn($query) => $query->where('is_active', true))
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
 
         $categories = $products->pluck('category')->unique('id')->sortBy('sort_order')->values();
-        $hasOffers = $products->contains(fn (Product $product) => $product->is_on_offer);
+        $hasOffers = $products->contains(fn(Product $product) => $product->is_on_offer);
 
         $filter = $this->filter;
         if ($filter === 'offers' && ! $hasOffers) {
@@ -56,13 +56,14 @@ class ProductGrid extends Component
         }
 
         $cards = $products
-            ->filter(fn (Product $product) => match ($filter) {
+            ->filter(fn(Product $product) => match ($filter) {
                 'all' => true,
                 'offers' => $product->is_on_offer,
                 default => $product->category->slug === $filter,
             })
-            ->map(fn (Product $product) => [
+            ->map(fn(Product $product) => [
                 'id' => $product->id,
+                'slug' => $product->slug,
                 'name' => $product->name,
                 'description' => $product->description,
                 'price' => $product->price,

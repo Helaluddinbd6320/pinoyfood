@@ -16,7 +16,7 @@
     <div class="grid">
         @forelse ($cards as $card)
             <article class="card" wire:key="product-{{ $card['id'] }}">
-                <div class="ph" style="background: {{ $card['bg'] }}">
+                <a class="ph" href="{{ route('product.show', $card['slug']) }}" style="background: {{ $card['bg'] }}" aria-label="{{ $card['name'] }} details">
                     @if ($card['on_offer'])
                         <span class="off">-{{ $card['discount'] }}%</span>
                     @endif
@@ -25,9 +25,9 @@
                     @else
                         <span aria-hidden="true">{{ $card['emoji'] }}</span>
                     @endif
-                </div>
+                </a>
                 <div class="cb">
-                    <h3>{{ $card['name'] }}</h3>
+                    <h3><a class="pl" href="{{ route('product.show', $card['slug']) }}">{{ $card['name'] }}</a></h3>
                     @if ($card['description'])
                         <small>{{ $card['description'] }}</small>
                     @endif

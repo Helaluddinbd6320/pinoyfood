@@ -46,3 +46,7 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback'])
     ->name('auth.google.callback');
 Route::post('/account/logout', [GoogleController::class, 'logout'])
     ->name('customer.logout');
+
+    Route::get('/product/{slug}', [\App\Http\Controllers\ProductController::class, 'show'])
+    ->middleware('throttle:120,1')
+    ->name('product.show');
