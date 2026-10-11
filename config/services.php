@@ -37,6 +37,8 @@ return [
 
     'contact' => [
         'email' => env('CONTACT_EMAIL', 'hello@pinoyfoodksa.com'),
+        'phone' => env('CONTACT_PHONE', env('WHATSAPP_BUSINESS_NUMBER')),
+
     ],
 
     'backup' => [

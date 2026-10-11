@@ -125,6 +125,15 @@ class OrdersTable
                     self::statusAction('noAnswer', 'No answer', 'no_answer', 'warning', Heroicon::OutlinedXCircle),
                     self::cancelAction(),
                     self::assignRiderAction(),
+                    // Step 16: PDFs. Receipt for admin and staff, slip also for the assigned rider.
+                    Action::make('receiptPdf')->label('Receipt PDF')->icon(Heroicon::OutlinedDocumentText)
+                        ->url(fn (Order $record) => route('staff.orders.receipt', $record))
+                        ->openUrlInNewTab()
+                        ->visible(fn () => (bool) auth()->user()?->isBackOffice()),
+                    Action::make('slipPdf')->label('Delivery slip')->icon(Heroicon::OutlinedPrinter)
+                        ->url(fn (Order $record) => route('staff.orders.slip', $record))
+                        ->openUrlInNewTab()
+                        ->visible(fn (Order $record) => auth()->user()?->can('view', $record) ?? false),
                     Action::make('maps')->label('Open in Maps')->icon(Heroicon::OutlinedMapPin)
                         ->url(fn (Order $record) => self::mapsUrl($record))
                         ->openUrlInNewTab()

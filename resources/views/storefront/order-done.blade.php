@@ -8,6 +8,7 @@
             <p>{{ $order->slot_label ?? 'We will confirm your delivery time on WhatsApp' }}@if ($area) · {{ $area->name }}@endif</p>
             <p>{{ $order->location_pin_url ? 'Location pin saved.' : 'No pin yet. Send one on WhatsApp so the rider finds you faster.' }}</p>
             <p class="cx-muted">You will get a WhatsApp message when we confirm.</p>
+            <a class="cx-btn" href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('order.receipt', now()->addDays(7), ['orderNo' => $order->order_no]) }}" target="_blank" rel="noopener">Download receipt (PDF)</a>
         </div>
 
         @foreach ($payments as $payment)
