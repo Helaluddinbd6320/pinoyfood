@@ -6,6 +6,7 @@ namespace App\Livewire;
 
 use App\Models\Product;
 use App\Services\CartService;
+use App\Services\SuggestionService;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -21,8 +22,16 @@ class ProductDetail extends Component
 
     public function add(CartService $cart): void
     {
-        $status = $cart->add($this->productId);
+        $this->toast($cart->add($this->productId));
+    }
 
+    public function addRelated(int $id, CartService $cart): void
+    {
+        $this->toast($cart->add($id));
+    }
+
+    private function toast(string $status): void
+    {
         $this->dispatch('cart-updated');
         $this->dispatch('cart-toast', message: match ($status) {
             'added' => 'Added to your cart',
@@ -32,7 +41,7 @@ class ProductDetail extends Component
         });
     }
 
-    public function render()
+    public function render(SuggestionService $suggestions)
     {
         $product = Product::query()
             ->with('category')
@@ -50,6 +59,9 @@ class ProductDetail extends Component
         return view('livewire.product-detail', [
             'product' => $product,
             'allergens' => $allergens,
+            'related' => $product ? $this->related($product, $suggestions) : collect(),
+            'showTl' => $product && filled($product->name_tl)
+                && mb_strtolower(trim((string) $product->name_tl)) !== mb_strtolower(trim($product->name)),
             'soldOut' => $product && $product->track_stock && (int) $product->stock <= 0,
             'until' => $product && $product->is_on_offer && $product->sale_ends_at
                 ? $product->sale_ends_at->format('D j M')
@@ -61,5 +73,28 @@ class ProductDetail extends Component
                 ? 'https://wa.me/?text='.rawurlencode("{$product->name}: SAR {$product->effective_price} at Pinoy Food KSA. Order here: {$url}")
                 : null,
         ]);
+    }
+
+    /** Hand-made pairs first, then other products from the same category. Never the product itself. */
+    private function related(Product $product, SuggestionService $suggestions)
+    {
+        $items = $suggestions->pairs([$product->id => 1]);
+
+        if ($items->count() < SuggestionService::LIMIT) {
+            $skip = $items->pluck('id')->push($product->id)->all();
+
+            $more = Product::query()
+                ->where('category_id', $product->category_id)
+                ->whereNotIn('id', $skip)
+                ->where('is_active', true)
+                ->where(fn ($q) => $q->where('track_stock', false)->orWhere('stock', '>', 0))
+                ->orderBy('sort_order')->orderBy('name')
+                ->limit(SuggestionService::LIMIT - $items->count())
+                ->get();
+
+            $items = $items->concat($more);
+        }
+
+        return $items->take(SuggestionService::LIMIT)->values();
     }
 }

@@ -27,7 +27,7 @@
             </nav>
         </header>
 
-        <div class="cx-page">
+        <div class="pd-page">
             <livewire:product-detail :product-id="$product->id" />
         </div>
     </div>

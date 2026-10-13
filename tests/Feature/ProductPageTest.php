@@ -119,4 +119,34 @@ class ProductPageTest extends TestCase
 
         Livewire::test(ProductGrid::class)->assertSee(route('product.show', $p->slug), false);
     }
+
+        #[Test]
+    public function the_page_shows_pairs_and_falls_back_to_the_same_category(): void
+    {
+        $a = $this->product(['name' => 'Smoked fish']);
+        $b = $this->product(['name' => 'Sawsawan set', 'category_id' => $a->category_id]);
+        \Illuminate\Support\Facades\DB::table('product_pairs')->insert([
+            'product_id' => $a->id, 'paired_product_id' => $b->id, 'sort_order' => 0,
+        ]);
+        $c = $this->product(['name' => 'Longganisa', 'category_id' => $a->category_id]);
+
+        $this->get(route('product.show', $a->slug))
+            ->assertOk()
+            ->assertSee('Pairs well with')
+            ->assertSee('Sawsawan set')
+            ->assertSee('Longganisa'); // category fallback fills the list
+    }
+
+    #[Test]
+    public function a_translation_equal_to_the_name_is_hidden_and_related_add_uses_the_cart(): void
+    {
+        $a = $this->product(['name' => 'Leche flan', 'name_tl' => 'leche flan']);
+        $b = $this->product(['name' => 'Ube halaya', 'category_id' => $a->category_id]);
+
+        Livewire::test(ProductDetail::class, ['productId' => $a->id])
+            ->assertViewHas('showTl', false)
+            ->call('addRelated', $b->id);
+
+        $this->assertSame([$b->id => 1], app(CartService::class)->items());
+    }
 }
