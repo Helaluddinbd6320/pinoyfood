@@ -272,3 +272,14 @@ a.pl:hover{text-decoration:underline}
 @media(prefers-reduced-motion:reduce){
   .tag.a,.tag.b{animation:none}
 }
+
+/* Pointing hand on the product page "Add to cart" button */
+.pd-add{position:relative}
+.pd-hand{display:inline-block;margin-right:8px;animation:pdpoint 1.1s ease-in-out infinite}
+@keyframes pdpoint{
+  0%,100%{transform:translateX(-4px)}
+  50%{transform:translateX(5px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .pd-hand{animation:none}
+}
