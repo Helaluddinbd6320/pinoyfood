@@ -104,9 +104,11 @@
                                     @endif
                                     {{ Sar::format($r->effective_price) }}
                                 </span>
-                                <button type="button" class="sx-add" wire:click="addRelated({{ $r->id }})"
-                                    wire:loading.attr="disabled" wire:target="addRelated({{ $r->id }})">+
-                                    Add</button>
+                                <button type="button" class="sx-add pd-radd"
+                                    wire:click="addRelated({{ $r->id }})" wire:loading.attr="disabled"
+                                    wire:target="addRelated({{ $r->id }})">
+                                    <span class="pd-hand sm" aria-hidden="true">👉</span> + Add
+                                </button>
                             </div>
                         </div>
                     @endforeach

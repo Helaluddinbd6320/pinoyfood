@@ -283,3 +283,6 @@ a.pl:hover{text-decoration:underline}
 @media(prefers-reduced-motion:reduce){
   .pd-hand{animation:none}
 }
+
+.pd-hand.sm{margin-right:4px;font-size:13px;animation-duration:1.4s}
+.pd-radd{display:inline-flex;align-items:center}
