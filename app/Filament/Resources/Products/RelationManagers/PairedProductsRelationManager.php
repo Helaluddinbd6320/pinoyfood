@@ -29,11 +29,11 @@ class PairedProductsRelationManager extends RelationManager
             ->headerActions([
                 AttachAction::make()
                     ->preloadRecordSelect()
-                    // AttachAction ignores policies (spec 3b): only active products, never itself.
-                    ->recordSelectOptionsQuery(fn (Builder $query) => $query
+                    ->recordSelectOptionsQuery(fn(Builder $query) => $query
                         ->where('is_active', true)
                         ->whereKeyNot($this->getOwnerRecord()->getKey()))
-                    ->schema(fn (AttachAction $action): array => [
+                    ->recordSelectSearchColumns(['name'])
+                    ->schema(fn(AttachAction $action): array => [
                         $action->getRecordSelect(),
                         TextInput::make('sort_order')->numeric()->minValue(0)->maxValue(255)->default(0),
                     ]),
