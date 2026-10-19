@@ -46,6 +46,14 @@ class Product extends Model
             ->orderByPivot('sort_order');
     }
 
+
+    /** Inverse of pairedProducts(): products that list this one as a pair. Filament's Attach looks for it. */
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_pairs', 'paired_product_id', 'product_id')
+            ->withPivot('sort_order');
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
