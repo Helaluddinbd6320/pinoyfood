@@ -16,16 +16,27 @@
     <div class="grid">
         @forelse ($cards as $card)
             <article class="card" wire:key="product-{{ $card['id'] }}">
-                <a class="ph" href="{{ route('product.show', $card['slug']) }}" style="background: {{ $card['bg'] }}" aria-label="{{ $card['name'] }} details">
-                    @if ($card['on_offer'])
-                        <span class="off">-{{ $card['discount'] }}%</span>
-                    @endif
-                    @if ($card['image'])
-                        <img src="{{ $card['image'] }}" alt="{{ $card['name'] }}" loading="lazy">
+                <div class="pimg">
+                    <a class="ph" href="{{ route('product.show', $card['slug']) }}" style="background: {{ $card['bg'] }}" aria-label="{{ $card['name'] }} details">
+                        @if ($card['on_offer'])
+                            <span class="off">-{{ $card['discount'] }}%</span>
+                        @endif
+                        @if ($card['image'])
+                            <img src="{{ $card['image'] }}" alt="{{ $card['name'] }}" loading="lazy">
+                        @else
+                            <span aria-hidden="true">{{ $card['emoji'] }}</span>
+                        @endif
+                    </a>
+
+                    @if ($card['sold_out'])
+                        <span class="soldtag">Sold out</span>
                     @else
-                        <span aria-hidden="true">{{ $card['emoji'] }}</span>
+                        <button type="button" class="glass-add" wire:click="add({{ $card['id'] }})" wire:loading.attr="disabled" wire:target="add({{ $card['id'] }})" aria-label="Add {{ $card['name'] }} to cart">
+                            <span class="pd-hand sm" aria-hidden="true">👉</span> Add
+                        </button>
                     @endif
-                </a>
+                </div>
+
                 <div class="cb">
                     <h3><a class="pl" href="{{ route('product.show', $card['slug']) }}">{{ $card['name'] }}</a></h3>
                     @if ($card['description'])
@@ -41,11 +52,6 @@
                             @endif
                             {{ Sar::format($card['effective']) }}
                         </span>
-                        @if ($card['sold_out'])
-                            <button type="button" class="add" disabled>Sold out</button>
-                        @else
-                            <button type="button" class="add" wire:click="add({{ $card['id'] }})" wire:loading.attr="disabled" wire:target="add({{ $card['id'] }})">Add</button>
-                        @endif
                     </div>
                 </div>
             </article>

@@ -88,14 +88,21 @@
                     @foreach ($related as $r)
                         @php($rl = ProductLook::for($r))
                         <div class="pd-rc" wire:key="rel-{{ $r->id }}">
-                            <a class="pd-ri" href="{{ route('product.show', $r->slug) }}"
-                                style="background: {{ $rl['bg'] }}" aria-label="{{ $r->name }}">
-                                @if ($rl['image'])
-                                    <img src="{{ $rl['image'] }}" alt="{{ $r->name }}" loading="lazy">
-                                @else
-                                    <span aria-hidden="true">{{ $rl['emoji'] }}</span>
-                                @endif
-                            </a>
+                            <div class="pimg">
+                                <a class="pd-ri" href="{{ route('product.show', $r->slug) }}"
+                                    style="background: {{ $rl['bg'] }}" aria-label="{{ $r->name }}">
+                                    @if ($rl['image'])
+                                        <img src="{{ $rl['image'] }}" alt="{{ $r->name }}" loading="lazy">
+                                    @else
+                                        <span aria-hidden="true">{{ $rl['emoji'] }}</span>
+                                    @endif
+                                </a>
+                                <button type="button" class="glass-add" wire:click="addRelated({{ $r->id }})"
+                                    wire:loading.attr="disabled" wire:target="addRelated({{ $r->id }})"
+                                    aria-label="Add {{ $r->name }} to cart">
+                                    <span class="pd-hand sm" aria-hidden="true">👉</span> Add
+                                </button>
+                            </div>
                             <div class="pd-rb">
                                 <a class="pl" href="{{ route('product.show', $r->slug) }}">{{ $r->name }}</a>
                                 <span class="pd-rp">
@@ -104,11 +111,6 @@
                                     @endif
                                     {{ Sar::format($r->effective_price) }}
                                 </span>
-                                <button type="button" class="sx-add pd-radd"
-                                    wire:click="addRelated({{ $r->id }})" wire:loading.attr="disabled"
-                                    wire:target="addRelated({{ $r->id }})">
-                                    <span class="pd-hand sm" aria-hidden="true">👉</span> + Add
-                                </button>
                             </div>
                         </div>
                     @endforeach

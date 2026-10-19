@@ -254,7 +254,6 @@ a.pl:hover{text-decoration:underline}
 .pd-rb{padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
 .pd-rb .pl{font-weight:700}
 .pd-rp{font:700 16px 'Bricolage Grotesque',sans-serif}
-.pd-rb .sx-add{align-self:flex-start;margin-top:auto}
 
 
 /* Floating hero tags */
@@ -273,7 +272,7 @@ a.pl:hover{text-decoration:underline}
   .tag.a,.tag.b{animation:none}
 }
 
-/* Pointing hand on the product page "Add to cart" button */
+/* Pointing hand */
 .pd-add{position:relative}
 .pd-hand{display:inline-block;margin-right:8px;animation:pdpoint 1.1s ease-in-out infinite}
 @keyframes pdpoint{
@@ -283,6 +282,23 @@ a.pl:hover{text-decoration:underline}
 @media(prefers-reduced-motion:reduce){
   .pd-hand{animation:none}
 }
-
 .pd-hand.sm{margin-right:4px;font-size:13px;animation-duration:1.4s}
-.pd-radd{display:inline-flex;align-items:center}
+
+/* Glass "Add" button floating over the product image (home grid and Pairs well with) */
+.pimg{position:relative}
+.glass-add{
+  position:absolute;right:10px;bottom:10px;z-index:2;
+  display:inline-flex;align-items:center;gap:2px;
+  padding:7px 14px;border-radius:999px;cursor:pointer;
+  font:700 13px 'DM Sans',sans-serif;color:#fff;
+  background:rgba(255,255,255,.26);
+  border:1.5px solid rgba(255,255,255,.85);
+  box-shadow:0 0 0 1px rgba(36,21,51,.28),0 4px 14px rgba(36,21,51,.3),inset 0 1px 0 rgba(255,255,255,.55);
+  text-shadow:0 1px 3px rgba(0,0,0,.5);
+  -webkit-backdrop-filter:blur(8px) saturate(150%);
+  backdrop-filter:blur(8px) saturate(150%);
+  transition:background .15s,transform .15s;
+}
+.glass-add:hover{background:rgba(255,255,255,.4);transform:translateY(-1px)}
+.glass-add:disabled{opacity:.55;cursor:not-allowed}
+.soldtag{position:absolute;right:10px;bottom:10px;z-index:2;background:rgba(36,21,51,.78);color:#fff;font:700 12px 'DM Sans',sans-serif;border-radius:999px;padding:6px 12px}
