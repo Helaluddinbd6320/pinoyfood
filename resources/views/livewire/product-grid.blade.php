@@ -1,7 +1,7 @@
 @use('App\Support\Sar')
 <div>
     <div class="sh">
-        <h2>What are you craving?</h2>
+        <h2>Shop the Pinoy pantry</h2>
         <div class="chips" role="group" aria-label="Filter menu">
             <button type="button" class="chip" aria-pressed="{{ $active === 'all' ? 'true' : 'false' }}" wire:click="setFilter('all')">All</button>
             @if ($hasOffers)

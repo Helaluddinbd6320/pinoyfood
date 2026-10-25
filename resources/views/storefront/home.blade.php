@@ -23,16 +23,16 @@
 
         <div class="hero">
             <div>
-                <h1>Lutong bahay, delivered in Riyadh.</h1>
-                <p>Adobo, longganisa, pandesal and the pantry brands you grew up with. Order online, pay on delivery,
-                    and eat like you are home.</p>
+                <h1>Pinoy groceries, delivered in Riyadh.</h1>
+                <p>Longganisa, tocino, tinapa, tokwa, atchara and the pantry brands you grew up with. Order online,
+                    pay on delivery, and stock up like you are home.</p>
                 <div class="cta">
                     <a class="btn p" href="#menu">Order now</a>
                     <a class="btn s" href="#how">How it works</a>
                 </div>
             </div>
             <div class="plate" aria-hidden="true">
-                <div class="disc"><span>🍲</span></div>
+                <div class="disc"><span>🛒</span></div>
                 <div class="ring"></div>
                 @if ($freeOn)
                     <div class="tag a">🚚 Free delivery over {{ Sar::format($freeMin) }}</div>
@@ -57,12 +57,12 @@
 
         <section id="how">
             <div class="sh">
-                <h2>Three steps to your table</h2>
+                <h2>Three steps to your door</h2>
             </div>
             <div class="steps">
                 <div class="step">
-                    <h3>1. Pick your food</h3>
-                    <p>Choose from ready meals, bakery and pantry items.</p>
+                    <h3>1. Pick your groceries</h3>
+                    <p>Choose from frozen, chilled and pantry items.</p>
                 </div>
                 <div class="step">
                     <h3>2. Tell us where</h3>
@@ -85,7 +85,7 @@
 
     <footer>
         <div class="wrap">
-            <h2>Miss home? Order lutong bahay today.</h2>
+            <h2>Miss home? Stock up on Pinoy favorites today.</h2>
             <a class="btn" href="#menu">Order now</a>
             <a href="{{ route('privacy') }}" style="color:inherit">Privacy</a>
         </div>
